@@ -20,10 +20,11 @@ export default function Login() {
         username, 
         password
       });
-      console.log(res.status==200);
+      console.log(res);
+      const userId = res.data.user_id;
       alert(res.data.message);
       if(res.status == 200){
-        navigate("/MainPage");
+        navigate(`/MainPage/${userId}`);
       }
     } catch (err) {
       setError("Invalid username or password");

@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 
-export default function ChatItem({ id ,name, msg, time }) {
+export default function ChatItem({ user_id ,connection_id , name, msg, time }) {
   return (
 <div className="flex px-4 py-3 items-center cursor-pointer hover:bg-gray-200">
   {/* Profile Image */}
@@ -14,7 +15,7 @@ export default function ChatItem({ id ,name, msg, time }) {
   </div>
 
       {/* Chat Details */}
-    <Link to={`/personalpage/${id}`}>     
+    <Link to={`/personalpage/${user_id}/${connection_id}`}>     
       <div className="flex-1 flex flex-col border-b border-gray-300 py-2">
 
         {/* Name + Time (same row) */}

@@ -12,6 +12,7 @@ export default function SignUp() {
   const [gmail, setGmail] = useState(null);
   const [mobile , setMobile] = useState(null);
   const [error, setError] = useState("");
+  const [dp, setDp] = useState();
 
   const navigate = useNavigate();
 
@@ -20,12 +21,22 @@ export default function SignUp() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/signup",{
-        username, 
-        password,
-        gmail,
-        mobile
-      });
+
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    formData.append("gmail", gmail);
+    formData.append("mobile", mobile);
+    formData.append("dp", dp); // this is the image file
+
+    const res = await axios.post(
+    "http://localhost:3000/api/auth/signup",
+    formData,
+    {
+        headers: { "Content-Type": "multipart/form-data" }
+    }
+    );
+
       console.log(res);
       alert(res.data.message);
       if(res.status == 200){
@@ -86,6 +97,13 @@ export default function SignUp() {
           }}
           className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+        <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setDp(e.target.files[0])}
+            className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+
 
         <button
           type="submit"
