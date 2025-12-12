@@ -3,24 +3,22 @@ import db from "../db/connection.js";
 
 const contactlist = express.Router();
 
-async function SQLexec1(query,id){
-    return new Promise((resolve,reject)=>{
-        db.query(query , [id,id],(err,results) => {
+// to find the connection where any of two is user_id
+async function SQLexec1(query , user_id){
+    return new Promise((resolve , reject)=>{
+        db.query(query , [user_id , user_id],(err , results) => {
         if(err){
             reject({message: "SQL error in fetching from connection table"});
         }
         else{
-            //result1=results;
-            //console.log(result1);
-
             resolve(results);
-            //res.status(200).json(results);            
         }
         }
         );
     });
 }
 
+//find credentials of all users
 async function SQLexec2(query2){
     return new Promise((resolve,reject)=>{
     db.query(query2 , [],(err,results) => {
@@ -39,39 +37,71 @@ async function SQLexec2(query2){
     });
 }
 
-contactlist.get("/:id", async (req,res)=>{ // id should be 
-    const {id} = req.params;
-    console.log("user_id",id);
+//find latest chats of all connections 
+
+async function SQLexec3(query3){
+    return new Promise((resolve,reject)=>{
+    db.query(query3 , [],(err,results) => {
+        if(err){
+            reject({message: "SQL error in fetching from chats table"});
+        }
+        else{
+            //console.log(results);
+
+            //res.status(200).json(results);   
+            resolve(results);         
+        }
+
+    }
+    );
+    });
+}
+
+contactlist.get("/:user_id", async (req,res)=>{ // id should be
+    
+    const {user_id} = req.params;
+    console.log("user_id",user_id);
+
+    let connections_user_id = new Map(); // map stores (user_ids , connection_id and latest chat info ) of all connections of this user
+
     const query = "SELECT * FROM connection WHERE user1_id = ? or user2_id=?";
 
-    let connection=[];
-    let result2=new Map();
-
-    connection = await SQLexec1(query,id);
+    let connection = await SQLexec1(query,user_id);
 
     const query2 = "SELECT * FROM credentials";
 
     let credential = await SQLexec2(query2);
 
-    console.log("%%%%%%%%%%%",connection);
-    console.log("$$$$$$$$$$$$$",credential);
+    const query3 = `SELECT c.*
+                    FROM chats c
+                    JOIN (
+                        SELECT MAX(id) AS max_id
+                        FROM chats
+                        GROUP BY connection_id
+                    ) t ON c.id = t.max_id`;
 
+    let latest_chats = await SQLexec3(query3);
+    const latest_chats_map = new Map( latest_chats.map( x => [x.connection_id , x] )  );// now it has [connection_id, latest_chat_details]
+    console.log(latest_chats_map);
+
+    // stores all user_ids of connections to this user in map
     for(let x of connection){
-        if(x.user1_id == id || x.user2_id == id){
-            if(x.user1_id == id){
-                result2.set(x.user2_id,x.id);
+        if(x.user1_id == user_id || x.user2_id == user_id){
+
+            if(x.user1_id == user_id){
+                connections_user_id.set(x.user2_id , latest_chats_map.get(x.id) );// x.id is connection id and we are obtaining latest details for it
             }
             else{
-                result2.set(x.user1_id,x.id);
+                connections_user_id.set(x.user1_id , latest_chats_map.get(x.id) );
             }
+
         }
-        //result2.set(x.id,x.name);
     }
-    //console.log(result2);
+
     let result=[];
     for(let x of credential){
-        if(result2.get(x.id)!=null){
-            result.push({...x , connectionId : result2.get(x.id)});
+        if( connections_user_id.get(x.id)!=null ){
+            result.push({...x , latest_chat_info : connections_user_id.get(x.id)});
         }
 
     }

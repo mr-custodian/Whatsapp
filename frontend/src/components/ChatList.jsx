@@ -3,14 +3,6 @@ import ChatItem from "./ChatItem";
 import axios from "axios";
 import {useEffect ,useState} from "react";
 
-
-
-  const contacts_temp = [
-    { user_id:1 , connection_id:101 ,name: "Rahul", msg: "Hey, what's up?", time: "10:23 AM" },
-    { user_id:2 , connection_id:102 ,name: "Sneha", msg: "See you tomorrow!", time: "09:11 AM" },
-    { user_id:3 , connection_id:103 ,name: "Ankit", msg: "Send me the files", time: "Yesterday" },
-  ];
-  
 export default function ChatList({user_id}) {
 
   //const [contacts, setContacts] = useState([]);
@@ -23,21 +15,19 @@ export default function ChatList({user_id}) {
         const res = await axios.get(
           `http://localhost:3000/api/mainpage/${user_id}`
         );
-        //await func(res.data , contacts);
+        console.log(res.data);
         const formatted = res.data.map(item => ({
           user_id: item.id,
-          connection_id : item.connectionId,
+          connection_id : item.latest_chat_info.connection_id,
           name: item.name,
-          msg: "Hey, what's up?",
-          time: "10:23 AM"
+          msg: item.latest_chat_info.message ,
+          time: item.latest_chat_info.chat_time,
+          dp: item.dp
         }));
 
         setContacts(formatted);
-        /*for(let i=0;i<res.data.length;i+=1){
-          contacts.push({id:res.data[i].id , name: res.data[i].name , msg: "Hey, what's up?", time: "10:23 AM"})
-        }*/
+
         console.log("formatted", formatted);
-        //setContacts(res.data);   // store result in state
 
         console.log(typeof res.data);
       } catch (err) {
@@ -63,10 +53,3 @@ export default function ChatList({user_id}) {
     </div>
   );
 }
-/*
-
-        {contacts.map((c) => (
-        <ChatItem key={c.user_id} {...c} />
-        ))}
-
-*/

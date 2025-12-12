@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 
 let io = null;
 
+
 export function initSocket(server) {
   io = new Server(server, {
     cors: {
@@ -32,7 +33,7 @@ export function initSocket(server) {
 
     socket.on("sendMessage", (data) => {
       console.log("reached to bCKEND",data);
-      io.to(data.room).emit("newMessage", { message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  });
+      io.to(data.room).emit("newMessage", { message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  ,chat_time: data.chat_time});
     });
 
   });

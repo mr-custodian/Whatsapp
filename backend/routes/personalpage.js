@@ -27,9 +27,9 @@ async function SQLexec1(query,id){
     });
 }
 
-async function SQLexec2(query,[connection_id , chatTime , message] ){
+async function SQLexec2(query,[connection_id , chat_time , message] ){
     return new Promise((resolve,reject)=>{
-        db.query(query , [connection_id , chatTime , message] ,(err,results) => {
+        db.query(query , [connection_id , chat_time , message] ,(err,results) => {
 
         if(err){
             reject({message : "Problem in chats table query"});
@@ -75,8 +75,8 @@ chatlist.get("/personalpage/:user_id/:connection_id" , async (req, res)=>{
 
 chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
     const message =  req.body.message;
+    const chat_time = req.body.chat_time;
     const {user_id,connection_id} = req.params;
-    const chatTime = getCurrentDate();
 
     const query = "INSERT INTO chats (connection_id, chat_time, message) VALUES (?, ?, ?)";
 
@@ -86,9 +86,9 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
         
     const name = await SQLexec3(query2, user_id);
 
-    const result = await SQLexec2(query , [connection_id , chatTime , user_id+":"+message]);//user_id is sender_id added to msg
+    const result = await SQLexec2(query , [connection_id , chat_time , user_id+":"+message]);//user_id is sender_id added to msg
     
-    res.status(200).json({message : "successfully added chat to db" , sender_name : name[0].NAME});
+    res.status(200).json({message : "successfully added chat to db" , sender_name : name[0].NAME , chat_time : chat_time});
 
     }
     catch(err){
