@@ -3,9 +3,7 @@ import { useEffect , useState } from "react";
 import { Send } from "lucide-react"; // if you have lucide-react (recommended)
 import axios from "axios";
 import socket from "../../socket.js";
-import { Avatar } from "flowbite-react";
-
-import { Button } from "flowbite-react";
+import { Avatar , Button} from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 
@@ -155,7 +153,7 @@ export default function PersonalPage() {
 
           {/* Contact Name */}
           <h2 className="text-lg font-semibold ml-3">{contact_name}</h2>
-          
+
       </div>
 
     <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100">

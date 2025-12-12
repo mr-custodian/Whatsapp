@@ -58,6 +58,22 @@ async function SQLexec3(query2 , user_id){
     });
 }
 
+async function SQLfind_reciever_id(query_find_reciever_data, connection_id){
+    return new Promise((resolve,reject)=>{
+        db.query(query_find_reciever_data , [connection_id] ,(err,results) => {
+
+        if(err){
+            reject({message : "Problem in credentials table query"});
+        }
+        else{
+
+            resolve(results);
+        }
+        }
+        );
+    });
+}
+
 chatlist.get("/personalpage/:user_id/:connection_id" , async (req, res)=>{
 
     const {connection_id} = req.params;
@@ -78,17 +94,29 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
     const chat_time = req.body.chat_time;
     const {user_id,connection_id} = req.params;
 
+    const query_find_reciever_data = "SELECT * FROM connection where id = ?"//put connection_id here to find reciever_id
+
     const query = "INSERT INTO chats (connection_id, chat_time, message) VALUES (?, ?, ?)";
 
-    const query2 = "SELECT NAME FROM credentials WHERE id = ?";
+    const query2 = "SELECT * FROM credentials WHERE id = ?";
 
     try{
+
+    let sender_id = undefined;
+
+    const sender_reciever_id = await SQLfind_reciever_id(query_find_reciever_data, connection_id);
+
+    if(sender_reciever_id.user1_id == user_id)sender_id = sender_reciever_id.user2_id;
+    else sender_id = sender_reciever_id.user2_id;
         
-    const name = await SQLexec3(query2, user_id);
+    const sender_data = await SQLexec3(query2, user_id);
+    const reciever_data = await SQLexec3(query2, sender_id);
+
+    console.log(reciever_data);
 
     const result = await SQLexec2(query , [connection_id , chat_time , user_id+":"+message]);//user_id is sender_id added to msg
     
-    res.status(200).json({message : "successfully added chat to db" , sender_name : name[0].NAME , chat_time : chat_time});
+    res.status(200).json({message : "successfully added chat to db" , sender_name : sender_data[0].NAME , chat_time : chat_time});
 
     }
     catch(err){
