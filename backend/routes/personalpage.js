@@ -61,16 +61,14 @@ async function SQLexec3(query2 , user_id){
 chatlist.get("/personalpage/:user_id/:connection_id" , async (req, res)=>{
 
     const {connection_id} = req.params;
-    //console.log(connection_id);
+
     const query = "SELECT * FROM chats WHERE connection_id = ?";
     try {
     const result = await SQLexec1(query , connection_id);
 
-    //.log(result);
     res.status(200).json(result);
     }
     catch(err){
-        console.log("ddddddddddddd");
         res.status(500).json(err);
     }
 });
@@ -79,7 +77,7 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
     const message =  req.body.message;
     const {user_id,connection_id} = req.params;
     const chatTime = getCurrentDate();
-    console.log("frfrfrfrfr",message);
+
     const query = "INSERT INTO chats (connection_id, chat_time, message) VALUES (?, ?, ?)";
 
     const query2 = "SELECT NAME FROM credentials WHERE id = ?";
@@ -88,11 +86,9 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
         
     const name = await SQLexec3(query2, user_id);
 
-    console.log(name[0].NAME + " : " + message);
-    const result = await SQLexec2(query , [connection_id , chatTime , name[0].NAME + " : " + message]);
+    const result = await SQLexec2(query , [connection_id , chatTime , user_id+":"+message]);//user_id is sender_id added to msg
     
-    console.log("rrrrrrrr",result);
-    res.status(200).json("successfully added chat to db");
+    res.status(200).json({message : "successfully added chat to db" , sender_name : name[0].NAME});
 
     }
     catch(err){

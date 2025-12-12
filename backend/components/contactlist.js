@@ -39,8 +39,9 @@ async function SQLexec2(query2){
     });
 }
 
-contactlist.get("/:id", async (req,res)=>{ // id should be user_id
+contactlist.get("/:id", async (req,res)=>{ // id should be 
     const {id} = req.params;
+    console.log("user_id",id);
     const query = "SELECT * FROM connection WHERE user1_id = ? or user2_id=?";
 
     let connection=[];
@@ -52,8 +53,8 @@ contactlist.get("/:id", async (req,res)=>{ // id should be user_id
 
     let credential = await SQLexec2(query2);
 
-    console.log(connection);
-    console.log(credential);
+    console.log("%%%%%%%%%%%",connection);
+    console.log("$$$$$$$$$$$$$",credential);
 
     for(let x of connection){
         if(x.user1_id == id || x.user2_id == id){
@@ -74,7 +75,7 @@ contactlist.get("/:id", async (req,res)=>{ // id should be user_id
         }
 
     }
-    console.log(result);
+    console.log("@@@@@@@@@@@",result);
     res.status(200).json(result);
 
 });
