@@ -17,12 +17,15 @@ export default function ChatList({user_id}) {
         );
         console.log(res.data);
         const formatted = res.data.map(item => ({
+          own_id: user_id,
           user_id: item.id,
-          connection_id : item.latest_chat_info.connection_id,
+          dp: item.dp,
           name: item.name,
+          connection_id : item.latest_chat_info.connection_id,
           msg: item.latest_chat_info.message ,
           time: item.latest_chat_info.chat_time,
-          dp: item.dp
+          sender_id: item.latest_chat_info.sender_id,
+          receiver_id: item.latest_chat_info.receiver_id
         }));
 
         setContacts(formatted);

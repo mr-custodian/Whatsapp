@@ -34,6 +34,7 @@ export default function PersonalPage() {
   const data = location.state;
   const contact_name = data.user_name;
   const dp = data.dp;
+  const own_id = data.own_id;
 
 
   async function init_list(res) {
@@ -44,25 +45,22 @@ export default function PersonalPage() {
 
         let str = res.data[idx].message;
         let chat_time = res.data[idx].chat_time;
-        let name = "Hidden";
+        //user_id here is others id from the contact list , not yours
+        const name = (res.data[idx].sender_id == user_id) ? contact_name : "You";
 
-        if(str.split(":").length > 1){
-          name = contact_name;
-          if(str.split(":")[0] == user_id){
-            name = "You";
+          if(name == "You"){
+          initial_chat_list.push({message : str , side : "right" , chat_time: chat_time});
           }
-          if(name=="You"){
-          initial_chat_list.push({message : name+" : "+str.split(":")[1] , side : "right" , chat_time: chat_time});
-          }
+
           else{
-          initial_chat_list.push({message : name+" : "+str.split(":")[1] , side : "left", chat_time: chat_time});
+          initial_chat_list.push({message : str , side : "left", chat_time: chat_time});
           }
-        }
-        else{
-          initial_chat_list.push({message : name+" : "+str.split(":")[0] , side : "left", chat_time: chat_time});
-        }
+
         
       }
+      //console.log(initial_chat_list);
+      console.log("****",user_id);
+      console.log(res.data);
       setResult(initial_chat_list);
       resolve(initial_chat_list);
     }
@@ -77,6 +75,7 @@ export default function PersonalPage() {
     const fetchChats = async () => {
       try{
         const res = await axios.get(`http://localhost:3000/api/personalpage/${user_id}/${connection_id}`);
+        //console.log("*******",res);
         //i think below line was the cause of breakpoint
         const initial_chat_list = await init_list(res);//Promise to copy message field to list , see the logic in function body
       }
@@ -91,16 +90,18 @@ export default function PersonalPage() {
 
     // --- SOCKET RECEIVE MESSAGE ---
     socket.on("newMessage", (msg) => {
+      console.log("socket recieved",msg);
       let name = "You";
-      if(msg.sender_id != user_id){
+      if(msg.sender_id != own_id){
         name = msg.sender_name;
       }
 
       if(name == "You"){
-        setResult((prev) => [...prev, {message : name + " : " + msg.message , side : "right" , chat_time: msg.chat_time}]);
+        //{message : name + " : " + str , side : "left", chat_time: chat_time}
+        setResult((prev) => [...prev, {message : msg.message , side : "right" , chat_time: msg.chat_time}]);
       }
       else{
-        setResult((prev) => [...prev, {message : name + " : " + msg.message , side : "left" , chat_time: msg.chat_time}]);
+        setResult((prev) => [...prev, {message : msg.message , side : "left" , chat_time: msg.chat_time}]);
       }
 
     });
@@ -114,12 +115,14 @@ export default function PersonalPage() {
     if(message == "" || message == null)return;
     try{
       const res = await axios.post(`http://localhost:3000/api/personalpage/${user_id}/${connection_id}`,{message : message , chat_time: getCurrentMySQLDateTime()});
+      console.log(own_id,"iiiiiiiii",res.data);
       socket.emit("sendMessage", {
         room: connection_id,
         message: message,
-        sender_id: user_id,
+        sender_id: own_id,//handleSend is firing through this so sender_id is own_id
         sender_name: res.data.sender_name,
-        chat_time: res.data.chat_time
+        chat_time: res.data.chat_time,
+        receiver_name: res.data.receiver_name
       });
 
       setMessage("");
@@ -156,31 +159,42 @@ export default function PersonalPage() {
 
       </div>
 
-    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100">
-      {result?.map((obj, i) => (
-        <div
-          key={i}
-          className={`flex w-full ${
-            obj.side === "right" ? "justify-end" : "justify-start"
-          }`}
-        >
-          <div
-            className={`px-3 py-2 rounded-lg shadow max-w-[75%] relative
-              ${obj.side === "right" ? "bg-green-200" : "bg-white"}`}
-          >
-            {/* Message */}
-            <div className="text-gray-900 text-[15px] leading-snug">
-              {obj.message}
-            </div>
+<div
+  className="flex-1 overflow-y-auto p-4 space-y-3 bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: "url('https://images.wallpaperscraft.com/image/single/astronaut_art_space_129529_1080x1920.jpg')",
+  }}
+>
+  {result?.map((obj, i) => (
+    <div
+      key={i}
+      className={`flex w-full ${
+        obj.side === "right" ? "justify-end" : "justify-start"
+      }`}
+    >
+      <div
+        className={`px-3 py-2 rounded-lg shadow max-w-[75%] relative
+          ${obj.side === "right" ? "bg-green-200" : "bg-white"}`}
+      >
 
-            {/* Time */}
-            <div className="text-[11px] text-gray-600 mt-1 text-right">
-              {obj.chat_time}
-            </div>
-          </div>
+        {/* 🔹 CONTACT NAME INSIDE BUBBLE */}
+        <div className="text-xs font-bold text-gray-700 mb-1">
+          {obj.side === "right" ? "You" : contact_name}
         </div>
-      ))}
+
+        {/* 🔹 MESSAGE TEXT */}
+        <div className="text-gray-900 text-[15px] leading-snug">
+          {obj.message}
+        </div>
+
+        {/* 🔹 TIME */}
+        <div className="text-[11px] text-gray-600 mt-1 text-right">
+          {obj.chat_time}
+        </div>
+      </div>
     </div>
+  ))}
+</div>
 
 
 

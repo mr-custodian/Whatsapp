@@ -33,7 +33,7 @@ export function initSocket(server) {
 
     socket.on("sendMessage", (data) => {
       console.log("reached to bCKEND",data);
-      io.to(data.room).emit("newMessage", { message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  ,chat_time: data.chat_time});
+      io.to(data.room).emit("newMessage", { message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  , receiver_name: data.receiver_name , chat_time: data.chat_time});
     });
 
   });
