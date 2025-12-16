@@ -25,7 +25,9 @@ export default function ChatList({user_id}) {
           msg: item.latest_chat_info.message ,
           time: item.latest_chat_info.chat_time,
           sender_id: item.latest_chat_info.sender_id,
-          receiver_id: item.latest_chat_info.receiver_id
+          receiver_id: item.latest_chat_info.receiver_id,
+          chat_state : item.latest_chat_info.state,
+          unread_count : item.latest_chat_info.unread
         }));
 
         setContacts(formatted);

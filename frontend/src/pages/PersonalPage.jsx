@@ -96,11 +96,25 @@ export default function PersonalPage() {
         name = msg.sender_name;
       }
 
-      if(name == "You"){
+      //set this message as read
+      const readChats = async () => {
+      try{
+        const res = await axios.post(`http://localhost:3000/api/personalpage/${connection_id}`);
+        console.log("*******",res);
+      }
+      catch(err){
+        setError("Problem from backend response - readchat");
+      }
+
+      };
+
+
+      if(name == "You"){ //message by you
         //{message : name + " : " + str , side : "left", chat_time: chat_time}
         setResult((prev) => [...prev, {message : msg.message , side : "right" , chat_time: msg.chat_time}]);
       }
-      else{
+      else{ //message by other
+        readChats();// update because you are reading other message thats why it marked to be "read"
         setResult((prev) => [...prev, {message : msg.message , side : "left" , chat_time: msg.chat_time}]);
       }
 
@@ -122,7 +136,8 @@ export default function PersonalPage() {
         sender_id: own_id,//handleSend is firing through this so sender_id is own_id
         sender_name: res.data.sender_name,
         chat_time: res.data.chat_time,
-        receiver_name: res.data.receiver_name
+        receiver_name: res.data.receiver_name,
+        chat_state: res.data.chat_state
       });
 
       setMessage("");

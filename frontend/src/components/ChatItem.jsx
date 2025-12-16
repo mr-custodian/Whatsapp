@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 
-export default function ChatItem({ own_id , user_id , dp,name , connection_id , msg , time , sender_id , receiver_id}) {
-  console.log( own_id , user_id , dp,name , connection_id , msg , time , sender_id , receiver_id );
+export default function ChatItem({ own_id , user_id , dp,name , connection_id , msg , time , sender_id , receiver_id , chat_state ,unread_count}) {
+  console.log( own_id , user_id , dp,name , connection_id , msg , time , sender_id , receiver_id , chat_state , unread_count);
   //user_id here is others id from the contact list , not yours
   const total_msg = (sender_id == user_id ? name : "You" ) + " : " + msg;
   return (
@@ -29,7 +29,7 @@ export default function ChatItem({ own_id , user_id , dp,name , connection_id , 
             <div className="flex justify-between items-center">
               <p className="text-gray-600 text-sm truncate">{total_msg}</p>
               <span className="ml-2 min-w-[22px] h-[22px] bg-green-500 text-white text-xs rounded-full flex items-center justify-center">
-                3
+                {unread_count}
               </span>
             </div>
           </div>

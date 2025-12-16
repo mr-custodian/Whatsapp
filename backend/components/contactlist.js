@@ -72,13 +72,24 @@ contactlist.get("/:user_id", async (req,res)=>{ // id should be
 
     let credential = await SQLexec2(query2);
 
-    const query3 = `SELECT c.*
+    const query3 = `with A as (SELECT c.*
                     FROM chats c
                     JOIN (
                         SELECT MAX(id) AS max_id
                         FROM chats
                         GROUP BY connection_id
-                    ) t ON c.id = t.max_id`;
+                    ) t ON c.id = t.max_id ) ,
+
+                    B as ( 
+                    SELECT connection_id , sum(state = "received") as unread 
+                    FROM chats
+                    group by connection_id
+                    )
+
+                    select A.id,A.connection_id,A.chat_time,A.message,A.sender_id,A.receiver_id,A.state,B.unread
+                    from A JOIN B 
+                    on A.connection_id = B.connection_id
+                    `;
 
     let latest_chats = await SQLexec3(query3);
     const latest_chats_map = new Map( latest_chats.map( x => [x.connection_id , x] )  );// now it has [connection_id, latest_chat_details]
