@@ -12,7 +12,7 @@ export function initSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    console.log("🔥 User connected:", socket.id);
+    console.log("🔥 User connected to socket with socket id:", socket.id);
 
     // When frontend sends message
     socket.on("send_message", (data) => {
@@ -27,13 +27,14 @@ export function initSocket(server) {
     });
 
     socket.on("joinRoom", ([room,user_id]) => {
-      socket.join(room);
-      console.log("User : ", user_id ,"has joined room : ", room);
+      const Room = String(room);
+      socket.join(Room); // convert to string 
+      console.log("socket : " , socket.id , "User : ", user_id ,"has joined room : ", Room , "with type " , typeof Room );
     });
 
     socket.on("sendMessage", (data) => {
-      console.log("reached to bCKEND",data);
-      io.to(data.room).emit("newMessage", { message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  , receiver_name: data.receiver_name , chat_time: data.chat_time , chat_state: data.chat_state});
+      console.log("reached to bCKEND with socket id : " , socket.id , "data",data);
+      io.to(String (data.room) ).emit("newMessage", { connection_id : data.room , message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  , receiver_name: data.receiver_name , chat_time: data.chat_time , chat_state: data.chat_state});
     });
 
   });

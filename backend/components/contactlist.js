@@ -60,7 +60,7 @@ async function SQLexec3(query3){
 contactlist.get("/:user_id", async (req,res)=>{ // id should be
     
     const {user_id} = req.params;
-    console.log("user_id",user_id);
+    //console.log("user_id",user_id);
 
     let connections_user_id = new Map(); // map stores (user_ids , connection_id and latest chat info ) of all connections of this user
 
@@ -81,7 +81,7 @@ contactlist.get("/:user_id", async (req,res)=>{ // id should be
                     ) t ON c.id = t.max_id ) ,
 
                     B as ( 
-                    SELECT connection_id , sum(state = "received") as unread 
+                    SELECT connection_id , CAST(SUM(state = 'received') AS UNSIGNED) AS unread
                     FROM chats
                     group by connection_id
                     )
@@ -93,7 +93,7 @@ contactlist.get("/:user_id", async (req,res)=>{ // id should be
 
     let latest_chats = await SQLexec3(query3);
     const latest_chats_map = new Map( latest_chats.map( x => [x.connection_id , x] )  );// now it has [connection_id, latest_chat_details]
-    console.log(latest_chats_map);
+    //console.log(latest_chats_map);
 
     // stores all user_ids of connections to this user in map
     for(let x of connection){
@@ -116,7 +116,7 @@ contactlist.get("/:user_id", async (req,res)=>{ // id should be
         }
 
     }
-    console.log("@@@@@@@@@@@",result);
+    //console.log("@@@@@@@@@@@",result);
     res.status(200).json(result);
 
 });

@@ -100,7 +100,7 @@ chatlist.get("/personalpage/:user_id/:connection_id" , async (req, res)=>{
     try {
     const result = await SQLexec1(query , connection_id);
 
-    console.log(result[result.length - 1]);
+    //console.log(result[result.length - 1]);
     if(result[result.length - 1].sender_id == user_id ){ // if last message sender is other then there may be chance of unread msg
         const update_read = await SQLexec_read_all_chat(query_read_all_chat,[chat_state , connection_id]);
     }
@@ -125,7 +125,7 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
     const query = "INSERT INTO chats (connection_id, chat_time, message, sender_id, receiver_id, state) VALUES (?, ?, ?, ?, ?, ?)";
 
     const query2 = "SELECT * FROM credentials WHERE id = ?";
-    console.log(user_id,connection_id);
+    //console.log(user_id,connection_id);
 
     try{
 
@@ -133,7 +133,7 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
 
     const sender_receiver_id = await SQLfind_receiver_id(query_find_receiver_data, connection_id);
     
-    console.log(sender_receiver_id);
+    //console.log(sender_receiver_id);
 
     //if(sender_receiver_id.user1_id == user_id)receiver_id = sender_receiver_id.user2_id;
     //else receiver_id = sender_receiver_id.user2_id;
@@ -146,10 +146,10 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
     const sender_data = await SQLexec3(query2, sender_id);//data of sender
     const receiver_data = await SQLexec3(query2, receiver_id);//data of receiver
 
-    console.log("******",sender_data[0].name,receiver_data[0].name);
-        console.log("******",sender_data,receiver_data);
+    //console.log("******",sender_data[0].name,receiver_data[0].name);
+    //console.log("******",sender_data,receiver_data);
 
-    console.log([connection_id , chat_time , message , String(sender_id) , receiver_id]);
+    //console.log([connection_id , chat_time , message , String(sender_id) , receiver_id]);
 
     const result = await SQLexec2(query , [connection_id , chat_time , message , String(sender_id) , receiver_id , chat_state]);//user_id is sender_id added to msg
     
@@ -168,7 +168,7 @@ chatlist.post("/personalpage/:connection_id" , async (req,res) => {
     const query_read_all_chat = `UPDATE chats SET state = ? WHERE connection_id = ? AND state = "received"`;
     try{
         const update_read = await SQLexec_read_all_chat(query_read_all_chat,[chat_state , connection_id]);
-        console.log("jjjjjjjjjjjjjjjjjjjjj",update_read);
+        //console.log("jjjjjjjjjjjjjjjjjjjjj",update_read);
         res.status(200).json(update_read);
     }
     catch(err){

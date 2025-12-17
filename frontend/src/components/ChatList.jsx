@@ -2,12 +2,14 @@
 import ChatItem from "./ChatItem";
 import axios from "axios";
 import {useEffect ,useState} from "react";
+import socket from "../../socket.js";
+
 
 export default function ChatList({user_id}) {
 
-  //const [contacts, setContacts] = useState([]);
   const [contacts , setContacts] = useState([]);
   const [error, setError] = useState("");
+
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -27,12 +29,13 @@ export default function ChatList({user_id}) {
           sender_id: item.latest_chat_info.sender_id,
           receiver_id: item.latest_chat_info.receiver_id,
           chat_state : item.latest_chat_info.state,
-          unread_count : item.latest_chat_info.unread
+          unread_count : item.latest_chat_info.unread // must be integer , SQL returned this
         }));
 
         setContacts(formatted);
 
         console.log("formatted", formatted);
+        console.log("res.data", res.data);
 
         console.log(typeof res.data);
       } catch (err) {
@@ -43,6 +46,46 @@ export default function ChatList({user_id}) {
 
     fetchChats();
   }, []);
+
+  // joined all rooms
+  useEffect(() => {
+      if (contacts.length === 0) return;
+
+      contacts.forEach(c => {
+        socket.emit("joinRoom", [c.connection_id, c.own_id]);
+        console.log(socket.id ,"->",c.connection_id , c);
+      });
+    }, [contacts.length]);
+
+  useEffect(() => {
+    const handler = (msg) => {
+      console.log("message received", msg);
+
+      setContacts(prevContacts =>
+        prevContacts.map(chat =>
+          chat.connection_id == msg.connection_id // msg.connection_id is string while other is integer
+            ? {
+                ...chat,
+                msg: msg.message,
+                unread_count: chat.unread_count + 1,
+                time: msg.chat_time,
+                sender_id: msg.sender_id,
+                receiver_id: msg.receiver_id,
+                chat_state: msg.chat_state
+              }
+            : chat
+        )
+      );
+    };
+
+    socket.on("newMessage", handler);
+
+    return () => {
+      socket.off("newMessage", handler);
+    };
+  }, []);
+
+
 
   
 

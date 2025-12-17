@@ -59,8 +59,8 @@ export default function PersonalPage() {
         
       }
       //console.log(initial_chat_list);
-      console.log("****",user_id);
-      console.log(res.data);
+      //console.log("****",user_id);
+      //console.log(res.data);
       setResult(initial_chat_list);
       resolve(initial_chat_list);
     }
@@ -86,11 +86,12 @@ export default function PersonalPage() {
     };
     fetchChats();
     // --- SOCKET JOIN ROOM ---
-    socket.emit("joinRoom", [connection_id , user_id]);
+    console.log(typeof connection_id , "and" , typeof own_id);
+    socket.emit("joinRoom", [connection_id , own_id]);
 
     // --- SOCKET RECEIVE MESSAGE ---
     socket.on("newMessage", (msg) => {
-      console.log("socket recieved",msg);
+      console.log("message receieved by in personalpage with socket id : ",socket.id," is ",msg);
       let name = "You";
       if(msg.sender_id != own_id){
         name = msg.sender_name;
@@ -100,7 +101,7 @@ export default function PersonalPage() {
       const readChats = async () => {
       try{
         const res = await axios.post(`http://localhost:3000/api/personalpage/${connection_id}`);
-        console.log("*******",res);
+        //console.log("*******",res);
       }
       catch(err){
         setError("Problem from backend response - readchat");
@@ -129,7 +130,7 @@ export default function PersonalPage() {
     if(message == "" || message == null)return;
     try{
       const res = await axios.post(`http://localhost:3000/api/personalpage/${user_id}/${connection_id}`,{message : message , chat_time: getCurrentMySQLDateTime()});
-      console.log(own_id,"iiiiiiiii",res.data);
+      //console.log(own_id,"iiiiiiiii",res.data);
       socket.emit("sendMessage", {
         room: connection_id,
         message: message,
@@ -143,7 +144,7 @@ export default function PersonalPage() {
       setMessage("");
     } 
     catch(err){
-        console.log(err);
+        //console.log(err);
         setError("Problem from backend response during send");
     }
   };
