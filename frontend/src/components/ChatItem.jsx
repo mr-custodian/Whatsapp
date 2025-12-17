@@ -30,9 +30,14 @@ export default function ChatItem({ own_id , user_id , dp , name , connection_id 
 
             <div className="flex justify-between items-center">
               <p className="text-gray-600 text-sm truncate">{full_message}</p>
-              <span className="ml-2 min-w-[22px] h-[22px] bg-green-500 text-white text-xs rounded-full flex items-center justify-center">
-                {unread_count}
-              </span>
+
+              {unread_count > 0 && (
+                <span className="ml-2 min-w-[22px] h-[22px] bg-green-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {unread_count}
+                </span>
+              )}
+
+
             </div>
           </div>
       </Link>

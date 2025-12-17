@@ -269,14 +269,31 @@ export default function PersonalPage() {
           <span>{obj.chat_time}</span>
 
           {obj.side === "right" && (
+          <span className="relative inline-block w-[18px] h-[14px] ml-1">
+            {/* first tick */}
             <span
-              className={`text-[12px] ${
-                obj.chat_state == "received" ? "text-gray-500" : "text-blue-600"
+              className={`absolute left-0 top-0 text-[14px] leading-none ${
+                obj.chat_state === "received"
+                  ? "text-gray-500"
+                  : "text-blue-600"
               }`}
             >
-              ✓✓
+              ✓
             </span>
-          )}
+
+            {/* second tick (slightly shifted) */}
+            <span
+              className={`absolute left-[5px] top-0 text-[14px] leading-none ${
+                obj.chat_state === "received"
+                  ? "text-gray-500"
+                  : "text-blue-600"
+              }`}
+            >
+              ✓
+            </span>
+          </span>
+        )}
+
         </div>
 
       </div>
