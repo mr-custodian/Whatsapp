@@ -29,7 +29,8 @@ export default function ChatList({user_id}) {
           sender_id: item.latest_chat_info.sender_id,
           receiver_id: item.latest_chat_info.receiver_id,
           chat_state : item.latest_chat_info.state,
-          unread_count : item.latest_chat_info.unread // must be integer , SQL returned this
+          unread_count : (item.latest_chat_info.sender_id != user_id ) ? item.latest_chat_info.unread : 0 // if last msg by this user then it has no pending msg 
+          // all pending msg (state = "received") are for other user
         }));
 
         setContacts(formatted);
@@ -84,6 +85,7 @@ export default function ChatList({user_id}) {
       socket.off("newMessage", handler);
     };
   }, []);
+
 
 
 

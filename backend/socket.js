@@ -34,7 +34,19 @@ export function initSocket(server) {
 
     socket.on("sendMessage", (data) => {
       console.log("reached to bCKEND with socket id : " , socket.id , "data",data);
-      io.to(String (data.room) ).emit("newMessage", { connection_id : data.room , message: data.message , sender_id: data.sender_id , sender_name: data.sender_name  , receiver_name: data.receiver_name , chat_time: data.chat_time , chat_state: data.chat_state});
+      io.to(String (data.room) ).emit("newMessage", { connection_id : data.room , message: data.message , 
+        sender_id: data.sender_id , sender_name: data.sender_name  , receiver_name: data.receiver_name , 
+        chat_time: data.chat_time , chat_state: data.chat_state , chat_id: data.chat_id});
+    });
+
+    socket.on("update_blue_tick" ,([room,user_id])=>{
+      console.log("socket : " , socket.id ," received update from user_id : ",user_id, "now firing this to other user so that it can see update blue tick because user with own_id read all");
+      io.to(String(room)).emit("receive_blue_tick",{connection_id: room , user_id : user_id});
+    });
+
+    socket.on("update_single_blue_tick" ,([room,user_id,chat_id])=>{
+      console.log("**********single - socket : " , socket.id ," received update from user_id : ",user_id, "now firing msg with id = ",chat_id," to other user so that it can see update blue tick because user with own_id read all");
+      io.to(String(room)).emit("receive_single_blue_tick",{connection_id: room , user_id : user_id , chat_id: chat_id });
     });
 
   });

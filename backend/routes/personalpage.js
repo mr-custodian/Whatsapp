@@ -152,8 +152,10 @@ chatlist.post("/personalpage/:user_id/:connection_id" , async (req,res) => {
     //console.log([connection_id , chat_time , message , String(sender_id) , receiver_id]);
 
     const result = await SQLexec2(query , [connection_id , chat_time , message , String(sender_id) , receiver_id , chat_state]);//user_id is sender_id added to msg
-    
-    res.status(200).json({message : "successfully added chat to db" , sender_name : sender_data[0].name , receiver_name : receiver_data[0].name ,chat_time : chat_time});
+    console.log("////////////////////",result);
+    res.status(200).json({message : "successfully added chat to db" , sender_name : sender_data[0].name , receiver_name : receiver_data[0].name ,
+        chat_time : chat_time , chat_state : chat_state , chat_id : result.insertId
+    });
 
     }
     catch(err){

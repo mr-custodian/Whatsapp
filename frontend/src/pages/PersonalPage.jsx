@@ -35,25 +35,29 @@ export default function PersonalPage() {
   const contact_name = data.user_name;
   const dp = data.dp;
   const own_id = data.own_id;
+  let chatlist_length=0;
 
 
   async function init_list(res) {
     return new Promise((resolve,reject)=>{
       try{
         let initial_chat_list=[];
+        chatlist_length = res.data.length;
         for(let idx=0 ; idx <res.data.length ; idx+=1){
 
         let str = res.data[idx].message;
         let chat_time = res.data[idx].chat_time;
+        let chat_state = res.data[idx].state;
+        let id = res.data[idx].id;
         //user_id here is others id from the contact list , not yours
         const name = (res.data[idx].sender_id == user_id) ? contact_name : "You";
 
           if(name == "You"){
-          initial_chat_list.push({message : str , side : "right" , chat_time: chat_time});
+          initial_chat_list.push({message : str , side : "right" , chat_time: chat_time , chat_state : chat_state , chat_id : id});
           }
 
           else{
-          initial_chat_list.push({message : str , side : "left", chat_time: chat_time});
+          initial_chat_list.push({message : str , side : "left", chat_time: chat_time , chat_state : chat_state , chat_id : id});
           }
 
         
@@ -75,7 +79,7 @@ export default function PersonalPage() {
     const fetchChats = async () => {
       try{
         const res = await axios.get(`http://localhost:3000/api/personalpage/${user_id}/${connection_id}`);
-        //console.log("*******",res);
+        console.log("*******",res);
         //i think below line was the cause of breakpoint
         const initial_chat_list = await init_list(res);//Promise to copy message field to list , see the logic in function body
       }
@@ -89,12 +93,54 @@ export default function PersonalPage() {
     console.log(typeof connection_id , "and" , typeof own_id);
     socket.emit("joinRoom", [connection_id , own_id]);
 
+    socket.emit("update_blue_tick" , [connection_id , own_id]);
+
+    socket.on("receive_blue_tick" , (data) => {
+
+      console.log(data.user_id ," == ",user_id," && ",data.connection_id," == ",connection_id);
+
+      if(data.user_id == user_id && data.connection_id == connection_id){
+
+        setResult( result => 
+          result.map( ele =>
+            ({ 
+              ...ele , 
+              chat_state:"read" 
+            })
+         )
+        );
+        
+      }
+    });
+
+    socket.on("receive_single_blue_tick" , (data) => {
+
+        console.log(data.user_id ," == ",user_id," && ",data.connection_id," == ",connection_id," && ",data.chat_id);
+
+          if(data.user_id == user_id && data.connection_id == connection_id){
+
+            setResult( result => 
+              result.map( ele =>
+                (ele.chat_id == data.chat_id)?
+                { 
+                  ...ele , 
+                  chat_state:"read" 
+                }: ele
+            )
+            );
+            
+          }
+      });
+
     // --- SOCKET RECEIVE MESSAGE ---
     socket.on("newMessage", (msg) => {
-      console.log("message receieved by in personalpage with socket id : ",socket.id," is ",msg);
+      console.log("message receieved in personalpage with socket id : ",socket.id," is ",msg);
       let name = "You";
+      let chatId = msg.chat_id;
+      console.log("chatid ::::::",chatId);
       if(msg.sender_id != own_id){
         name = msg.sender_name;
+        msg.chat_state = "read";// make this as read because initially it was "received and now change this as sender id is not this user"
       }
 
       //set this message as read
@@ -112,25 +158,37 @@ export default function PersonalPage() {
 
       if(name == "You"){ //message by you
         //{message : name + " : " + str , side : "left", chat_time: chat_time}
-        setResult((prev) => [...prev, {message : msg.message , side : "right" , chat_time: msg.chat_time}]);
+        setResult((prev) => [...prev, {message : msg.message , side : "right" , chat_time: msg.chat_time , chat_state : msg.chat_state , chat_id : msg.chat_id}]);
       }
       else{ //message by other
         readChats();// update because you are reading other message thats why it marked to be "read"
-        setResult((prev) => [...prev, {message : msg.message , side : "left" , chat_time: msg.chat_time}]);
+        chatlist_length = result.length;
+        setResult((prev) => [...prev, {message : msg.message , side : "left" , chat_time: msg.chat_time , chat_state : msg.chat_state , chat_id : msg.chat_id}]);
+        console.log("************ sending single blue tick ****************");
+
+        if(chatId){
+
+        socket.emit("update_single_blue_tick" , [connection_id , own_id , chatId]);
+        }
+
       }
 
     });
 
     return () => {
+      socket.off("receive_blue_tick");
       socket.off("newMessage");
+      socket.off("receive_single_blue_tick");
     };
   }, []);
+
+
 
   const handleSend = async () => {
     if(message == "" || message == null)return;
     try{
       const res = await axios.post(`http://localhost:3000/api/personalpage/${user_id}/${connection_id}`,{message : message , chat_time: getCurrentMySQLDateTime()});
-      //console.log(own_id,"iiiiiiiii",res.data);
+      console.log(own_id,"iiiiiiiii",res.data);
       socket.emit("sendMessage", {
         room: connection_id,
         message: message,
@@ -138,10 +196,13 @@ export default function PersonalPage() {
         sender_name: res.data.sender_name,
         chat_time: res.data.chat_time,
         receiver_name: res.data.receiver_name,
-        chat_state: res.data.chat_state
+        chat_state: res.data.chat_state,
+        chat_id: res.data.chat_id
       });
 
       setMessage("");
+
+      
     } 
     catch(err){
         //console.log(err);
@@ -203,10 +264,21 @@ export default function PersonalPage() {
           {obj.message}
         </div>
 
-        {/* 🔹 TIME */}
-        <div className="text-[11px] text-gray-600 mt-1 text-right">
-          {obj.chat_time}
+        {/* 🔹 TIME AND TICK */}
+        <div className="flex items-center justify-end gap-1 text-[11px] text-gray-600 mt-1">
+          <span>{obj.chat_time}</span>
+
+          {obj.side === "right" && (
+            <span
+              className={`text-[12px] ${
+                obj.chat_state == "received" ? "text-gray-500" : "text-blue-600"
+              }`}
+            >
+              ✓✓
+            </span>
+          )}
         </div>
+
       </div>
     </div>
   ))}
