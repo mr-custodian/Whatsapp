@@ -5,6 +5,8 @@ import axios from "axios";
 import socket from "../../socket.js";
 import { Avatar , Button} from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import FormatChatTime from "../helper_functions/FormatChatTime.js"
+import {FormatChatMessage} from "../helper_functions/FormatChatMessage.js";
 
 
 
@@ -212,6 +214,7 @@ export default function PersonalPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
+    
 
       {/* 🔹 TOP BAR */}
       <div className="bg-green-600 text-white px-4 py-3 flex items-center shadow">
@@ -227,7 +230,7 @@ export default function PersonalPage() {
 
           {/* Avatar */}
           <div className="flex flex-wrap gap-2">
-            <Avatar img="https://img.freepik.com/premium-vector/young-man-avatar-character-due-avatar-man-vector-icon-cartoon-illustration_1186924-4438.jpg?semt=ais_hybrid&w=740&q=80"
+            <Avatar img = {dp} 
             alt="avatar of Jese" rounded />
           </div>
 
@@ -236,70 +239,72 @@ export default function PersonalPage() {
 
       </div>
 
-<div
-  className="flex-1 overflow-y-auto p-4 space-y-3 bg-cover bg-center bg-no-repeat"
-  style={{
-    backgroundImage: "url('https://images.wallpaperscraft.com/image/single/astronaut_art_space_129529_1080x1920.jpg')",
-  }}
->
-  {result?.map((obj, i) => (
-    <div
-      key={i}
-      className={`flex w-full ${
-        obj.side === "right" ? "justify-end" : "justify-start"
-      }`}
-    >
+      {/* Chat List */}
+      
       <div
-        className={`px-3 py-2 rounded-lg shadow max-w-[75%] relative
-          ${obj.side === "right" ? "bg-green-200" : "bg-white"}`}
+        className="flex-1 overflow-y-auto p-4 space-y-3 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('https://images.wallpaperscraft.com/image/single/astronaut_art_space_129529_1080x1920.jpg')",
+        }}
       >
-
-        {/* 🔹 CONTACT NAME INSIDE BUBBLE */}
-        <div className="text-xs font-bold text-gray-700 mb-1">
-          {obj.side === "right" ? "You" : contact_name}
-        </div>
-
-        {/* 🔹 MESSAGE TEXT */}
-        <div className="text-gray-900 text-[15px] leading-snug">
-          {obj.message}
-        </div>
-
-        {/* 🔹 TIME AND TICK */}
-        <div className="flex items-center justify-end gap-1 text-[11px] text-gray-600 mt-1">
-          <span>{obj.chat_time}</span>
-
-          {obj.side === "right" && (
-          <span className="relative inline-block w-[18px] h-[14px] ml-1">
-            {/* first tick */}
-            <span
-              className={`absolute left-0 top-0 text-[14px] leading-none ${
-                obj.chat_state === "received"
-                  ? "text-gray-500"
-                  : "text-blue-600"
-              }`}
+        {result?.map((obj, i) => (
+          <div
+            key={i}
+            className={`flex w-full ${
+              obj.side === "right" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`px-3 py-2 rounded-lg shadow max-w-[75%] relative
+                ${obj.side === "right" ? "bg-green-200" : "bg-white"}`}
             >
-              ✓
-            </span>
 
-            {/* second tick (slightly shifted) */}
-            <span
-              className={`absolute left-[5px] top-0 text-[14px] leading-none ${
-                obj.chat_state === "received"
-                  ? "text-gray-500"
-                  : "text-blue-600"
-              }`}
-            >
-              ✓
-            </span>
-          </span>
-        )}
+              {/* 🔹 CONTACT NAME INSIDE BUBBLE */}
+              <div className="text-xs font-bold text-gray-700 mb-1">
+                {obj.side === "right" ? "You" : contact_name}
+              </div>
 
-        </div>
+              {/* 🔹 MESSAGE TEXT */}
+              <div className="text-gray-900 text-[15px] leading-snug">
+                { FormatChatMessage(obj.message) }
+              </div>
 
+              {/* 🔹 TIME AND TICK */}
+              <div className="flex items-center justify-end gap-1 text-[11px] text-gray-600 mt-1">
+                <span>{ FormatChatTime(obj.chat_time) }</span>
+
+                {obj.side === "right" && (
+                <span className="relative inline-block w-[18px] h-[14px] ml-1">
+                  {/* first tick */}
+                  <span
+                    className={`absolute left-0 top-0 text-[14px] leading-none ${
+                      obj.chat_state === "received"
+                        ? "text-gray-500"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    ✓
+                  </span>
+
+                  {/* second tick (slightly shifted) */}
+                  <span
+                    className={`absolute left-[5px] top-0 text-[14px] leading-none ${
+                      obj.chat_state === "received"
+                        ? "text-gray-500"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    ✓
+                  </span>
+                </span>
+              )}
+
+              </div>
+
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
-  ))}
-</div>
 
 
 

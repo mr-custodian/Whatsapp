@@ -1,5 +1,9 @@
 import { useEffect , useState} from "react";
 import { Link } from "react-router-dom";
+import FormatChatTime from "../helper_functions/FormatChatTime.js"
+import {FormatChatMessage , TruncateChatMessage} from "../helper_functions/FormatChatMessage.js";
+
+
 
 
 
@@ -11,66 +15,47 @@ export default function ChatItem({ own_id , user_id , dp , name , connection_id 
 
   return (
 <div className="flex items-center px-4 py-3 border-b bg-white hover:bg-gray-100 cursor-pointer">
+  {/* line 1 */}
+  <img
+    src={dp}
+    alt="dp"
+    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+  />
 
-  
-      <img 
-        src={dp} 
-        alt="dp"
-        className="w-12 h-12 rounded-full object-cover"
-      />
+  <Link
+    to={`/personalpage/${user_id}/${connection_id}`}
+    state={{ user_name: name, dp: dp, own_id: own_id }}
+    className="flex-1 ml-3 block min-w-0"   // ⭐ KEY
+  >
+    {/* line 2 */}
+    <div className="w-full">
+      {/* line 3 */}
+      <div className="flex items-center w-full">
+        <h3 className="font-semibold text-black truncate">
+          {name}
+        </h3>
 
-      <Link 
-      to={`/personalpage/${user_id}/${connection_id}`}
-      state = {{user_name : name , dp : dp , own_id : own_id}}
-      >
-          <div className="flex-1 ml-3">
-            <div className="flex justify-between">
-              <h3 className="font-semibold text-black">{name}</h3>
-              <span className="text-xs text-gray-500">{time}</span>
-            </div>
+        {/* line 4 */}
+        <span className="ml-auto text-xs text-gray-500 flex-shrink-0">
+          {FormatChatTime(time)}
+        </span>
+      </div>
 
-            <div className="flex justify-between items-center">
+      <div className="flex items-center w-full">
+        <p className="text-gray-600 text-sm truncate flex-1 min-w-0">
+          {TruncateChatMessage(full_message)}
+        </p>
 
-                {side === "right" && (
-                <span className="relative inline-block w-[18px] h-[14px] ml-1">
-                  {/* first tick */}
-                  <span
-                    className={`absolute left-0 top-0 text-[14px] leading-none ${
-                      chat_state === "received"
-                        ? "text-gray-500"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    ✓
-                  </span>
-
-                  {/* second tick (slightly shifted) */}
-                  <span
-                    className={`absolute left-[5px] top-0 text-[14px] leading-none ${
-                      chat_state === "received"
-                        ? "text-gray-500"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    ✓
-                  </span>
-                </span>
-              )}
-              <p className="text-gray-600 text-sm truncate">{full_message}</p>
-
-              {unread_count > 0 && (
-                <span className="ml-2 min-w-[22px] h-[22px] bg-green-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {unread_count}
-                </span>
-              )}
-
-
-            </div>
-          </div>
-      </Link>
-          
-
+        {unread_count > 0 && (
+          <span className="ml-2 min-w-[22px] h-[22px] bg-green-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
+            {unread_count}
+          </span>
+        )}
+      </div>
+    </div>
+  </Link>
 </div>
+
        
   );
 }

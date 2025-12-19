@@ -9,9 +9,10 @@ export default function MainPage() {
   const { user_id } = useParams();
   const [openMenu , setOpenMenu ] = useState(false);
   const navigate = useNavigate();
-
+//    <div className="h-screen w-full bg-gray-100 flex flex-col">
   return  (
     <div className="h-screen w-full bg-gray-100 flex flex-col">
+
 
       {/* 🔹 HEADER */}
       <div className="bg-green-600 text-white px-4 py-3 flex items-center justify-between shadow">
