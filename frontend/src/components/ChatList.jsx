@@ -79,10 +79,30 @@ export default function ChatList({user_id}) {
       );
     };
 
+    socket.on("receive_blue_tick" , (data) => {
+
+      //console.log(data.user_id ," == ",user_id," && ",data.connection_id," == ",connection_id);
+
+      //if(data.user_id == user_id && data.connection_id == connection_id){
+
+        setContacts( result => 
+          result.map( ele =>
+          (ele.connection_id == data.connection_id && ele.user_id == data.user_id)?
+            { 
+              ...ele , 
+              chat_state:"read" 
+            } : ele
+         )
+        );
+        
+      //}
+    });
+
     socket.on("newMessage", handler);
 
     return () => {
       socket.off("newMessage", handler);
+      socket.off("receive_blue_tick");
     };
   }, []);
 

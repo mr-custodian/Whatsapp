@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 export default function ChatItem({ own_id , user_id , dp , name , connection_id , msg , time , sender_id , receiver_id , chat_state ,unread_count}) {
   
   let full_message =  (sender_id == user_id ? name : "You" ) + " : " + msg;
+  let side = (sender_id == own_id )? "right" : "left";
 
 
   return (
@@ -29,6 +30,32 @@ export default function ChatItem({ own_id , user_id , dp , name , connection_id 
             </div>
 
             <div className="flex justify-between items-center">
+
+                {side === "right" && (
+                <span className="relative inline-block w-[18px] h-[14px] ml-1">
+                  {/* first tick */}
+                  <span
+                    className={`absolute left-0 top-0 text-[14px] leading-none ${
+                      chat_state === "received"
+                        ? "text-gray-500"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    ✓
+                  </span>
+
+                  {/* second tick (slightly shifted) */}
+                  <span
+                    className={`absolute left-[5px] top-0 text-[14px] leading-none ${
+                      chat_state === "received"
+                        ? "text-gray-500"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    ✓
+                  </span>
+                </span>
+              )}
               <p className="text-gray-600 text-sm truncate">{full_message}</p>
 
               {unread_count > 0 && (
